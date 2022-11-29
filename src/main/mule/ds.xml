@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <http:listener-config name="ds-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="ds-config" api="ds.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <flow name="ds-main">
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="cc9a3bfe-1be7-455e-aefa-bb8d2caac20c" >
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<flow name="ds-main">
         <http:listener config-ref="ds-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -158,7 +161,12 @@ output application/json
         </ee:transform>
         <logger level="INFO" message="get:\employee\(id)\salary-euro:ds-config" />
     </flow>
-    <flow name="post:\employee:application\json:ds-config">
+    <flow name="dsFlow" doc:id="a08404b4-cb7c-4e23-bfce-503477320381" >
+		<http:listener doc:name="Listener" doc:id="27c5ed25-7245-4c53-a0bc-8a2480988676" config-ref="ds-httpListenerConfig" path="/all-employees"/>
+		<logger level="INFO" doc:name="Logger" doc:id="edf22d54-0a3f-4718-850f-02cd00914a97" />
+		<http:request method="GET" doc:name="Request" doc:id="7df1e458-f30c-4fd1-8a61-bcdaa190a592" config-ref="HTTP_Request_configuration" path="/employee"/>
+	</flow>
+	<flow name="post:\employee:application\json:ds-config">
         <logger level="INFO" message="post:\employee:application\json:ds-config" />
     </flow>
 </mule>
